@@ -15,7 +15,7 @@ dependencies {
     compileOnly("com.zaxxer:HikariCP") {
         exclude group: "org.slf4j", module: "slf4j-api"
     }
-    implementation 'org.postgresql:postgresql:42.6.0'
+
     developmentOnly libs.p6spy.starter
 }
 

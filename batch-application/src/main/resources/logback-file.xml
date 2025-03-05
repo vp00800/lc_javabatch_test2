@@ -56,7 +56,7 @@
 				</rollingPolicy>
 			</appender>
 		</sift>
-	</appender> -->
+	</appender> -->  
   <logger name="org.springframework.transaction" level="INFO"/> 
   	<root level="INFO">
 		<appender-ref ref="ROLLING_FILE" />
