@@ -1,5 +1,4 @@
 name: Deploy to AWS
-
 on:
   workflow_dispatch:
   release:
@@ -11,12 +10,10 @@ env:
   AWS_REGION: ${{ vars.AWS_REGION }}
   AWS_ROLE_NAME: ${{ secrets.AWS_ROLE_NAME }}
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-  # ECS_SERVICE: ${{ secrets.ECS_SERVICE }}  # aws batch not required
-  # ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}  # aws batch not required
-  # CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}  # aws batch not required
-  # TASK_DEFINITION_NAME: ${{ secrets.TASK_DEFINITION_NAME }}  # aws batch not required
-  BATCH_JOB_QUEUE: ${{ secrets.BATCH_JOB_QUEUE }}  # aws batch add
-  BATCH_JOB_DEFINITION: ${{ secrets.BATCH_JOB_DEFINITION }}  # aws batch add
+  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
+  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
+  CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+  TASK_DEFINITION_NAME: ${{ secrets.TASK_DEFINITION_NAME }}
 
 permissions:
   contents: read
@@ -34,7 +31,7 @@ jobs:
       - name: Access to AWS
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_ROLE_NAME }}
+          role-to-assume: ${{ secrets.AWS_ROLE_NAME }}
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Export AWS_ACCOUNT_ID to environment variable
@@ -61,37 +58,26 @@ jobs:
           docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
           docker push $ECR_REPOSITORY:$IMAGE_TAG
-          docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REPOSITORY:latest
-          docker push $ECR_REPOSITORY:latest
           echo "image=$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      # aws batch not required
-      # - name: Download task definition
-      #   run: |
-      #     aws ecs describe-task-definition \
-      #       --task-definition $TASK_DEFINITION_NAME \
-      #       --query taskDefinition > task-definition.json
-
-      # - name: Fill in the new image ID in the Amazon ECS task definition
-      #   id: task-def
-      #   uses: aws-actions/amazon-ecs-render-task-definition@v1
-      #   with:
-      #     task-definition: task-definition.json
-      #     container-name: ${{ env.CONTAINER_NAME }}
-      #     image: ${{ steps.build-image.outputs.image }}
-
-      # - name: Deploy Amazon ECS task definition
-      #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      #   with:
-      #     task-definition: ${{ steps.task-def.outputs.task-definition }}
-      #     service: ${{ env.ECS_SERVICE }}
-      #     cluster: ${{ env.ECS_CLUSTER }}
-      #     wait-for-service-stability: true
-
-      - name: Submit Batch Job
+      - name: Download task definition
         run: |
-          aws batch submit-job \
-            --job-name jobLeaj0008 \
-            --job-queue $BATCH_JOB_QUEUE \
-            --job-definition $BATCH_JOB_DEFINITION \
-            --parameters "Image=${{ steps.build-image.outputs.image }}"
+          aws ecs describe-task-definition \
+            --task-definition $TASK_DEFINITION_NAME \
+            --query taskDefinition > task-definition.json
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
