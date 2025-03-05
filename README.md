@@ -1,4 +1,4 @@
-# Solid Java Batch  
+# Solid Java Batch 
 
 ## Prerequisites
 - **JDK 17 or newer** - check with command 

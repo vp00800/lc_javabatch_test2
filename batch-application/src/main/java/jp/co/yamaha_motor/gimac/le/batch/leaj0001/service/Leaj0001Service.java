@@ -26,12 +26,12 @@ import java.util.Map;
  *  工場処理日(PYMAC日)の情報を取得し、テキスト化する
  *  確定期間テーブルの今回確定期間のレコードを対象に、確定実施日を工場処理日(PYMAC日)で更新する
  *
- * @author R.Mochizuki
+ * @author  YMSL R.Mochizuki
  * @version 1.0.0
  *
  *  MODIFICATION HISTORY
- *  (Ver)  (Date)     (Name)            (Comment)
- *  1.0.0  2025/03/03 YMSL R.Mochizuki  New making
+ *  (Ver) (Date)     (Name)           (Comment)
+ *  1.0.0 2025/03/03 YMSL R.Mochizuki New making
  */
 
 @Service
@@ -60,7 +60,7 @@ public class Leaj0001Service {
      */
     protected void setParameter(Leaj0001ParameterModel pm, Map<String, Object> map) throws Exception {
 
-        //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
+    //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
 //        if ( "arg1".equals(name) ) {
 //            // MRP管理区分
 //            pm.setMrpControlClass(value);
@@ -81,7 +81,8 @@ public class Leaj0001Service {
             // ファイル出力先の取得(工場処理日)
             pm.setOutputFilePath(map.get("out1").toString());
         }
-        //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
+    //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
+
     }
 
     /**
@@ -89,7 +90,7 @@ public class Leaj0001Service {
      */
     protected void prepareParameterAfter(Leaj0001ParameterModel pm) throws Exception {
 
-        //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
+    //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
 //        // ログ出力用のクラス宣言
 //        LogReportWriter writer = ThreadLogReportWriter.getWriter();
 //
@@ -121,7 +122,8 @@ public class Leaj0001Service {
         logger.info("sysOwnerCd      : {}", pm.getSysOwnerCd());
         logger.info("mrpControlClass : {}", pm.getMrpControlClass());
         logger.info("outputFilePath  : {}", pm.getOutputFilePath());
-        //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
+    //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
+
     }
 
     /**
@@ -143,15 +145,14 @@ public class Leaj0001Service {
      */
     protected void main(Leaj0001ParameterModel pm) throws Exception {
 
-        //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
+    //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
 //        LogReportWriter writer = ThreadLogReportWriter.getWriter(); // ログ出力用のクラス宣言
         Logger logger = LoggerFactory.getLogger(Leaj0001Service.class);
-        //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
+    //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
+
         Leaj0001FixPeriodIdModel fixPeriodIdModel = new Leaj0001FixPeriodIdModel();
 
-
         String pymacDate = new String();        //工場処理日(PYMAC日)
-
 
 //        //ＰＹＭＡＣ日の取得SQL                                        //2017.04.28 削除
 //        String pymacDateSql = " SELECT pymac_date            "
@@ -159,7 +160,6 @@ public class Leaj0001Service {
 //                            + "  WHERE mrp_control_class = ? "
 //                            + "    AND sys_owner_cd      = ? "
 //                            ;
-
 
         //未発行で最小の確定予定日の取得SQL
         String pymacDateSql = " SELECT MIN(a.mrp_plan_date)                       "
@@ -174,7 +174,8 @@ public class Leaj0001Service {
                             ;
 
         //SQLパラメータの生成
-        //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
+
+    //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
 //        Object[] pymacDateParams = new Object[]{ pm.getMrpControlClass()
 //                , pm.getSysOwnerCd()
 //        };
@@ -216,6 +217,7 @@ public class Leaj0001Service {
                 writer.newLine();
             }
         }
+    //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
 
         if (StringUtils.isBlankText(pymacDate)) {
             // 該当データが存在しない場合エラーとする
@@ -226,10 +228,11 @@ public class Leaj0001Service {
         // ログメッセージ生成
         String logMessage = "PYMAC DATE     --> " + pymacDate;
         // ログ出力
+
+    //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
 //        writer.writeLog("", logMessage, null, null, null);
         logger.info(logMessage);
-        //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
-
+    //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
 
         //工場処理日更新
         String pymacDateUpdateSql     = " UPDATE lc_inp_pymac_date                    "
@@ -242,8 +245,9 @@ public class Leaj0001Service {
                                       + "    AND sys_owner_cd      = ?                "
                                       ;
 
-          //SQLパラメータの生成
-        //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
+        //SQLパラメータの生成
+
+    //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
 //        Object[] pymacDateUpdateParams = new Object[]{    pymacDate
 //                , pm.getSysDatetime()
 //                , pm.getUserId()
@@ -256,7 +260,7 @@ public class Leaj0001Service {
 //        int resultPymacDateUpdate = dao.setRecord(pymacDateUpdateSql, pymacDateUpdateParams);
         pstmt = executeSql(pm, pymacDateUpdateSql, pymacDate, fixPeriodIdModel, "2");
         int resultPymacDateUpdate = pstmt.executeUpdate();
-        //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
+    //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
 
         if (resultPymacDateUpdate != 0) {
 
@@ -271,7 +275,8 @@ public class Leaj0001Service {
                 ;
 
         //SQLパラメータの生成
-        //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
+
+    //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
 //        Object[] fixPeriodIdParams = new Object[]{ pm.getMrpControlClass()
 //                , pm.getSysOwnerCd()
 //        };
@@ -287,7 +292,7 @@ public class Leaj0001Service {
             fixPeriodIdModel.setFixPeriodId(fixPeriodId);
 
 //            fixPeriodIdModel = BatchUtils.convertResultModel(fixPeriodIdResultSet, Lcrj0001FixPeriodIdModel.class);
-        //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
+    //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
 
             //更新対象データの存在チェックSQL
             String existCheckSql = " SELECT 1                     "
@@ -299,7 +304,8 @@ public class Leaj0001Service {
                     ;
 
             //SQLパラメータの生成
-        //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
+
+    //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
 //            Object[] existCheckParams = new Object[]{ pm.getMrpControlClass()
 //                    , pm.getSysOwnerCd()
 //                    , fixPeriodIdModel.getFixPeriodId()
@@ -314,10 +320,15 @@ public class Leaj0001Service {
             while (result.next()) {
                 existCheckObj = result.getString(1);
             }
+    //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
 
             //検索結果0件の場合、次の確定期間IDで存在チェックを行う
+
+    //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
 //            if(existCheckObj == null){
             if(StringUtils.isBlankText(existCheckObj)) {
+    //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
+
             }
             //検索結果が存在した場合、更新処理に続く
             else{
@@ -336,7 +347,10 @@ public class Leaj0001Service {
                         + "     AND fix_period_id     = ? "
                         + "     AND mrp_plan_date     = ? "
                         ;
+
                 //SQLパラメータの生成
+
+    //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
 //                Object[] replicaThisTimeUpdateParams = new Object[]{ pymacDate
 //                        , 'T'
 //                        , pm.getSysDatetime()
@@ -349,21 +363,24 @@ public class Leaj0001Service {
 //                };
 //                // Update文の発行
 //                int resultReplicaThisTimeUpdate = dao.setRecord(replicaThisTimeUpdateSql, replicaThisTimeUpdateParams);
-
                 pstmt = executeSql(pm, replicaThisTimeUpdateSql, pymacDate, fixPeriodIdModel, "5");
                 int resultReplicaThisTimeUpdate = pstmt.executeUpdate();
+    //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
 
                 if ( resultReplicaThisTimeUpdate == 0 ) {
 
                     // 更新件数が0件の場合エラーとする
                     String errMsg = "MRP WORK fix period master update error";
+
+    //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
 //                    throw new BatchApplicationException(errMsg);
                     throw new JobParametersInvalidException(errMsg);
+    //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
+
                 }
                 else{
                     pm.replicaThisTimeUpdateCount += resultReplicaThisTimeUpdate;
                 }
-
 
                 //引数.MRP管理区分＝"STD"（オーダー発行MRP）の場合更新する
                 if (StringUtils.equals(pm.getMrpControlClass(),  "STD")) {
@@ -380,7 +397,10 @@ public class Leaj0001Service {
                             + "     AND fix_period_id   = ? "
                             + "     AND mrp_plan_date   = ? "
                             ;
+
                     //SQLパラメータの生成
+
+    //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
 //                    Object[] thisTimeUpdateParams = new Object[]{ pymacDate
 //                            , 'T'
 //                            , pm.getSysDatetime()
@@ -392,22 +412,25 @@ public class Leaj0001Service {
 //                    };
 //                    // Update文の発行
 //                    int resultThisTimeUpdate = dao.setRecord(thisTimeUpdateSql, thisTimeUpdateParams);
-
                     pstmt = executeSql(pm, thisTimeUpdateSql, pymacDate, fixPeriodIdModel, "6");
                     int resultThisTimeUpdate = pstmt.executeUpdate();
+    //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
 
                     if ( resultThisTimeUpdate == 0 ) {
 
                         // 更新件数が0件の場合エラーとする
                         String errMsg = "MRP fix period master update error";
+
+    //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
 //                        throw new BatchApplicationException(errMsg);
                         throw new JobParametersInvalidException(errMsg);
+    //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
+
                     }
                     else{
                         pm.thisTimeUpdateCount += resultThisTimeUpdate;
                     }
                 }
-
 
                 /* 前回確定期間の更新 (レプリカ) */
                 String replicaLastUpdateSql = ""
@@ -423,7 +446,10 @@ public class Leaj0001Service {
                         + "     AND mrp_plan_date    <> ? "
                         + "     AND fix_status        = ? "
                         ;
+
                 //SQLパラメータの生成
+
+    //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
 //                Object[] replicaLastUpdateParams
 //                        = new Object[]{ 'L'
 //                        , pm.getSysDatetime()
@@ -439,9 +465,9 @@ public class Leaj0001Service {
 //                int resultReplicaLastUpdate = dao.setRecord(replicaLastUpdateSql, replicaLastUpdateParams);
                 pstmt = executeSql(pm, replicaLastUpdateSql, pymacDate, fixPeriodIdModel, "7");
                 int resultReplicaLastUpdate = pstmt.executeUpdate();
+    //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
 
                 pm.replicaLatestUpdateCount += resultReplicaLastUpdate;
-
 
                 //引数.MRP管理区分＝"STD"（オーダー発行MRP）の場合更新する
                 if (StringUtils.equals(pm.getMrpControlClass(),  "STD")) {
@@ -458,7 +484,10 @@ public class Leaj0001Service {
                             + "     AND mrp_plan_date  <> ? "
                             + "     AND fix_status      = ? "
                             ;
+
                     //SQLパラメータの生成
+
+    //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
 //                    Object[] lastUpdateParams = new Object[]{ 'L'
 //                            , pm.getSysDatetime()
 //                            , pm.getUserId()
@@ -472,6 +501,7 @@ public class Leaj0001Service {
 //                    int resultLastUpdate = dao.setRecord(lastUpdateSql, lastUpdateParams);
                     pstmt = executeSql(pm, lastUpdateSql, pymacDate, fixPeriodIdModel, "8");
                     int resultLastUpdate = pstmt.executeUpdate();
+    //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
 
                     pm.latestUpdateCount += resultLastUpdate;
                 }
@@ -485,6 +515,7 @@ public class Leaj0001Service {
      */
     protected void term(Leaj0001ParameterModel pm) throws Exception {
 
+    //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
 //        LogReportWriter writer = ThreadLogReportWriter.getWriter();
 //
 //        // 処理結果ログ出力
@@ -502,8 +533,9 @@ public class Leaj0001Service {
         logger.info("[lc_mst_fix_period] Latest     Update Count  = {}", pm.getLatestUpdateCount());
         logger.info("[lc_inp_fix_period] This Time  Update Count  = {}", pm.getReplicaThisTimeUpdateCount());
         logger.info("[lc_inp_fix_period] Latest     Update Count  = {}", pm.getReplicaLatestUpdateCount());
-    }
+    //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
 
+    }
 
     /**
      * 文字列右埋め
@@ -529,6 +561,7 @@ public class Leaj0001Service {
 
         return sb.toString();
     }
+
     //---------------- 2025/03/03 R.Mochizuki g3 Start(Modify)
     public PreparedStatement executeSql(Leaj0001ParameterModel pm, String sql, String pymacDate, Leaj0001FixPeriodIdModel fixPeriodIdModel, String sqlClass) throws Exception {
         Connection conn = dataSource.getConnection();
@@ -597,4 +630,6 @@ public class Leaj0001Service {
             throw e;
         }
     }
+    //---------------- 2025/03/03 R.Mochizuki g3 End(Modify)
+
 }

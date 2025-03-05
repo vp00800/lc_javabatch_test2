@@ -21,9 +21,9 @@ public class Leaj0001ParameterModel {
     public int replicaLatestUpdateCount;   //(レプリカ)前回確定期間更新件数
 
     // Batch Parameter Values
-    private String mrpControlClass;       // MRP管理区分
-    private String outputFilePath;        // 工場処理日ファイル
+    private String mrpControlClass;        // MRP管理区分
+    private String outputFilePath;         // 工場処理日ファイル
 
     Timestamp sysDatetime = new Timestamp(System.currentTimeMillis());
-    private String userId = "Leaj0001";   // PYMAC DATE
+    private String userId = "Leaj0001";    // USER ID
 }

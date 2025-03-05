@@ -6,7 +6,7 @@ on:
       - "**"
 
 env:
-  APP_PJ_PREFIX: "blank"
+  APP_PJ_PREFIX: "batch"
   PACKAGE_USERNAME: ${{ secrets.PACKAGE_USERNAME }}
   PACKAGE_REPO_TOKEN: ${{ secrets.PACKAGE_REPO_TOKEN }}
 
@@ -38,14 +38,17 @@ jobs:
       - name: Test with Gradle
         run: |
           chmod +x gradlew
-          ./gradlew clean test --continue
+          ./gradlew clean test --continue --parallel
+
+      - name: Move JUnit test results
+        run: |
           rm -rf test-results
           mkdir test-results
           for proj in $APP_PJ_PREFIX-*; do \
             test_results_dir="$proj/build/test-results/test"; \
-            [ -d "$test_results_dir" ] && mv  "$test_results_dir"/*.xml  "test-results/"; \
+            echo "Processing $test_results_dir"; \
+            [ -d "$test_results_dir" ] && mv "$test_results_dir"/*.xml  "test-results/" || echo "No test XML files found"; \
           done
-        continue-on-error: true
 
       - name: Upload JUnit test results
         uses: actions/upload-artifact@v4

@@ -1,0 +1,110 @@
+name: Gimac Deploy to AWS ECS and SSM
+ 
+on:
+  workflow_dispatch:
+  release:
+    types: [created]
+ 
+env:
+  PACKAGE_USERNAME: ${{ secrets.PACKAGE_USERNAME }}
+  PACKAGE_REPO_TOKEN: ${{ secrets.PACKAGE_REPO_TOKEN }}
+  AWS_REGION: ${{ secrets.GIMAC_AWS_REGION }}
+  AWS_ROLE_NAME: ${{ secrets.GIMAC_AWS_ROLE_ARN }}
+  ECR_REPOSITORY: ${{ secrets.GIMAC_ECR_REPOSITORY_URI }}
+  TASK_DEFINITION_NAME: ${{ secrets.GIMAC_TASK_DEFINITION_NAME }}
+  CONTAINER_NAME: ${{ secrets.GIMAC_CONTAINER_NAME }}
+  SSM_ECS_TASK_DEFINITION_ARN: ${{ secrets.GIMAC_SSM_ECS_TASK_DEFINITION_ARN }}
+  SSM_ECR_IMAGE_TAG: ${{ secrets.GIMAC_SSM_ECR_IMAGE_TAG }}
+ 
+permissions:
+  contents: read
+  id-token: write
+ 
+jobs:
+  build-and-update-task-def:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+ 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+ 
+      - name: Access to AWS
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_NAME }}
+          aws-region: ${{ env.AWS_REGION }}
+ 
+      - name: Export AWS_ACCOUNT_ID to environment variable
+        shell: bash
+        run: echo "AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)" >> $GITHUB_ENV
+ 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'adopt'
+          java-version: 17
+          cache: 'gradle'
+ 
+      - name: Build with Gradle
+        run: |
+          chmod +x gradlew
+          ./gradlew clean build -x test
+ 
+      - name: Build, tag and Push image to AWS ECR
+        id: build-image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t ${{ env.ECR_REPOSITORY }}:$IMAGE_TAG .
+          aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+          docker push ${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
+          echo "image=${{ env.ECR_REPOSITORY }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
+ 
+      - name: Output IMAGE variable
+        run: |
+          echo "IMAGE=${{ steps.build-image.outputs.image }}"
+      - name: Download and clean task definition
+        run: |
+          # Download the latest revision of the task definition and clean up unnecessary fields
+          aws ecs describe-task-definition --task-definition $TASK_DEFINITION_NAME --query 'taskDefinition.{family: family, containerDefinitions: containerDefinitions, volumes: volumes, networkMode: networkMode, requiresCompatibilities: requiresCompatibilities, cpu: cpu, memory: memory, executionRoleArn: executionRoleArn, taskRoleArn: taskRoleArn}' | jq 'del(.tags)' > task-definition.json
+          cat task-definition.json # Debug: Output the download task definition
+ 
+      - name: Update image tag in task definition
+        id: update-image
+        run: |
+          # CONTAINER_NAME=${{ env.CONTAINER_NAME }}
+          IMAGE=${{ steps.build-image.outputs.image }}
+          jq --arg containerName "$CONTAINER_NAME" --arg imageName "$IMAGE" '
+            .containerDefinitions |= map(if .name == $containerName then .image = $imageName else . end)
+          ' task-definition.json > updated-task-definition.json
+          echo "Updated Task Definition:"
+          cat updated-task-definition.json
+ 
+      - name: Register new task definition
+        id: register-task-def
+        run: |
+          TASK_DEF=$(aws ecs register-task-definition --cli-input-json file://updated-task-definition.json)
+          echo "Task Definition Registered"
+          echo "Full Task Definition Response:"
+          echo $TASK_DEF
+          TASK_ARN=$(echo $TASK_DEF | jq -r '.taskDefinition.taskDefinitionArn')
+          echo "Task Definition ARN: $TASK_ARN"
+          echo "task_definition_arn=$TASK_ARN" >> $GITHUB_OUTPUT
+ 
+      - name: Update SSM Parameter With ECS Task definition ARN
+        run: |
+          TASK_ARN=${{ steps.register-task-def.outputs.task_definition_arn }}
+          aws ssm put-parameter \
+            --name ${{ env.SSM_ECS_TASK_DEFINITION_ARN }} \
+            --value $TASK_ARN \
+            --type String \
+            --overwrite
+      - name: Update SSM Parameter With Image Tag
+        run: |
+          IMG_TAG=${{ steps.build-image.outputs.image }}
+          aws ssm put-parameter \
+            --name ${{ env.SSM_ECR_IMAGE_TAG }} \
+            --value $IMG_TAG \
+            --type String \
+            --overwrite

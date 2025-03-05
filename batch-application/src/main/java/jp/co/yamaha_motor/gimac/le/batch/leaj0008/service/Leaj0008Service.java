@@ -77,12 +77,12 @@ public class Leaj0008Service {
         //    pm.setProdStrcFile(value);
         //}
         if ( map.get("arg1") != null ) {
-            // システムオーナーコード
-            pm.setSysOwnerCd(map.get("arg1").toString());
+            // MRP管理区分
+            pm.setMrpControlClass(map.get("arg1").toString());
         }
         if ( map.get("arg2") != null ) {
-            // MRP管理区分
-            pm.setMrpControlClass(map.get("arg2").toString());
+            // システムオーナーコード
+            pm.setSysOwnerCd(map.get("arg2").toString());
         }
         if ( map.get("out1") != null ) {
             // 構成マスターファイル

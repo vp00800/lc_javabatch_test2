@@ -35,7 +35,7 @@ import java.util.Map;
  * $LastChangedBy$
  *
  * MODIFICATION HISTORY
- *  (Ver)  (Date)         (Name)      (Comment)
+ *  (Ver) (Date)          (Name)      (Comment)
  *  1.0.0 2025/03/04 YMSL R.Mochizuki New making
  */
 
@@ -60,13 +60,12 @@ public class Leaj0004Service {
     }
     //---------------- 2025/02/18 Tao Xiaochuan g3 End(Add)
 
-
     /**
      * 引数取得
      */
     protected void setParameter(Leaj0004ParameterModel pm, Map<String, Object> map) throws Exception {
 
-        //---------------- 2025/03/04 R.Mochizuki g3 Start(Modify)
+    //---------------- 2025/03/04 R.Mochizuki g3 Start(Modify)
 //        if ( "arg1".equals(name) ) {
 //            // MRP管理区分
 //            pm.setMrpControlClass(value);
@@ -87,7 +86,8 @@ public class Leaj0004Service {
             // 納入基準日ファイル
             pm.setDelivStdDayFile(map.get("out1").toString());
         }
-        //---------------- 2025/03/04 R.Mochizuki g3 End(Modify)
+    //---------------- 2025/03/04 R.Mochizuki g3 End(Modify)
+
     }
 
     /**
@@ -95,7 +95,7 @@ public class Leaj0004Service {
      */
     protected void prepareParameterAfter(Leaj0004ParameterModel pm) throws Exception {
 
-        //---------------- 2025/03/04 R.Mochizuki g3 Start(Modify)
+    //---------------- 2025/03/04 R.Mochizuki g3 Start(Modify)
 //        LogReportWriter writer = ThreadLogReportWriter.getWriter();
 //
 //        //引数必須チェック
@@ -118,7 +118,7 @@ public class Leaj0004Service {
             throw new JobParametersInvalidException("Argument error [arg1:mrpControlClass] is blank");
         }
         if ( StringUtils.isBlankText(pm.getDelivStdDayFile()) ) {
-            throw new JobParametersInvalidException("Argument error [outf:delivStdDayFile] is blank");
+            throw new JobParametersInvalidException("Argument error [out1:delivStdDayFile] is blank");
         }
 
         // 引数内容ログ出力
@@ -126,7 +126,7 @@ public class Leaj0004Service {
         logger.info("sysOwnerCd      : {}", pm.getSysOwnerCd());
         logger.info("mrpControlClass : {}", pm.getMrpControlClass());
         logger.info("delivStdDayFile : {}", pm.getDelivStdDayFile());
-        //---------------- 2025/03/04 R.Mochizuki g3 End(Modify)
+    //---------------- 2025/03/04 R.Mochizuki g3 End(Modify)
 
     }
 
@@ -150,7 +150,9 @@ public class Leaj0004Service {
         String sql      = "";
         String writeRec = "";
 
+    //---------------- 2025/03/04 R.Mochizuki g3 Start(Modify)
 //        PrintWriter fileWriter = batchUtilityLogic.getPrintWriter(pm.getDelivStdDayFile());
+    //---------------- 2025/03/04 R.Mochizuki g3 End(Modify)
 
         try {
             //納入基準日の検索SQL
@@ -163,8 +165,9 @@ public class Leaj0004Service {
             sql += "  ORDER BY supplier              ";
             sql += "         , deliv_std_day         ";
 
-
             //SQLパラメータの生成
+
+    //---------------- 2025/03/04 R.Mochizuki g3 Start(Modify)
 //            Object[] sqlParams = new Object[] { pm.getMrpControlClass()
 //                    , pm.getSysOwnerCd()
 //            };
@@ -239,8 +242,9 @@ public class Leaj0004Service {
                 }
             }
         } finally {
-
         }
+    //---------------- 2025/03/04 R.Mochizuki g3 End(Modify)
+
     }
 
     /**
@@ -248,12 +252,15 @@ public class Leaj0004Service {
      */
     protected void term(Leaj0004ParameterModel pm) throws Exception {
 
+    //---------------- 2025/03/04 R.Mochizuki g3 Start(Modify)
 //        LogReportWriter writer = ThreadLogReportWriter.getWriter();
 //
 //        writer.writeLog("", "delivStdDayFile Output File Write Count = " + pm.getOutputDataCount(), null, null, null);
         Logger logger = LoggerFactory.getLogger(Leaj0008Service.class);
 
         logger.info("delivStdDayFile Output File Write Count = {}", pm.getOutputDataCount());
+    //---------------- 2025/03/04 R.Mochizuki g3 End(Modify)
+
     }
 
 
@@ -272,6 +279,8 @@ public class Leaj0004Service {
         sql += "    AND system_code  = 'LC'  ";
 
         // Select文の発行
+
+    //---------------- 2025/03/04 R.Mochizuki g3 Start(Modify)
 //        Object[] obj = dao.getRecord(sql, new Object[] {pm.getSysOwnerCd()});
         String scplanSysOwnerCd = "";
         try (Connection conn = dataSource.getConnection();
@@ -285,7 +294,9 @@ public class Leaj0004Service {
                 }
             }
         }
+    //---------------- 2025/03/04 R.Mochizuki g3 End(Modify)
 
+    //---------------- 2025/03/04 R.Mochizuki g3 Start(Modify)
 //        if (obj == null) {
 //            //該当データが存在しない場合エラーとする
 //            String msg	= " [lc_system_parameter] No Data Found Error."
@@ -302,6 +313,8 @@ public class Leaj0004Service {
         }else{
             pm.setScplanSysOwnerCd(scplanSysOwnerCd);
         }
+    //---------------- 2025/03/04 R.Mochizuki g3 End(Modify)
+
     }
 
     /**

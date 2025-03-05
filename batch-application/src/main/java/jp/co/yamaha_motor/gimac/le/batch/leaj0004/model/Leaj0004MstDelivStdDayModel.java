@@ -8,7 +8,6 @@ public class Leaj0004MstDelivStdDayModel {
     private String supplier;
     private String delivStdDay;
     private String delivStdClass;
-    private String shiftDivisionNum;
     private String ScplanSysOwnerCd;
 }
 
