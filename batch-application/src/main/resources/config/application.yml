@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: batch-sample
+  profiles:
+    active: actual # デフォルトではローカル設定を有効にし、コマンドライン引数または環境変数で上書きできます
+
+---
+spring.config.activate.on-profile: develop
+
+spring.datasource:
+  url: jdbc:postgresql://10.191.5.83:5432/mast2
+  username: mast2
+  password: mast2
+  driver-class-name: org.postgresql.Driver
+  hikari:
+    maximum-pool-size: 10
+    minimum-idle: 5
+    connection-timeout: 30000
+
+#  sql:
+#    init:
+#      mode: always
+#      schema-locations: classpath*:db/schema.sql
+#      continue-on-error: false
+
+spring.jpa:
+  database: POSTGRESQL
+  database-platform: org.hibernate.dialect.PostgreSQLDialect
+  properties:
+    hibernate.boot.allow_jdbc_metadata_access: false
+    hibernate.ddl-auto: none
+
+spring.batch:
+  initialize-schema: always # Spring Batch で必要なテーブルを自動的に作成するように設定します
+
+---
+spring.config.activate.on-profile: actual
+
+spring.datasource:
+  url: jdbc:postgresql://g4-rds-test2.c1mugayyw6vq.ap-northeast-1.rds.amazonaws.com:5432/g4rdstest2
+  username: mast2
+  password: mast2
+  driver-class-name: org.postgresql.Driver
+  hikari:
+    maximum-pool-size: 10
+    minimum-idle: 5
+    connection-timeout: 30000
+
+spring.jpa:
+  database: POSTGRESQL
+  database-platform: org.hibernate.dialect.PostgreSQLDialect
+  properties:
+    hibernate.boot.allow_jdbc_metadata_access: false
+    hibernate.ddl-auto: none
+
+spring.batch:
+  initialize-schema: always # Spring Batch で必要なテーブルを自動的に作成するように設定します
+
+---
+spring.config.activate.on-profile: logback-file
+
+logging:
+  config: classpath:logback-file.xml

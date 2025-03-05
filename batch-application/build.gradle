@@ -1,0 +1,21 @@
+plugins {
+  id 'com.ymsl.solid.build.framework-application'
+} 
+
+ext {
+    appMainClass = "com.g3.batch.BatchApplication"
+}
+
+dependencies {
+    implementation "com.ymsl.solid:solid-jpa"
+    implementation "org.springframework.boot:spring-boot-starter-batch"
+    implementation "org.postgresql:postgresql"
+    //implementation "com.zaxxer:HikariCP"
+    implementation "jakarta.transaction:jakarta.transaction-api"
+    compileOnly("com.zaxxer:HikariCP") {
+        exclude group: "org.slf4j", module: "slf4j-api"
+    }
+
+    developmentOnly libs.p6spy.starter
+}
+

@@ -1,0 +1,9 @@
+plugins {
+  id 'com.ymsl.solid.build.java-sonarscan'
+}
+
+subprojects {
+  //The same "GV" for all subprojects
+  group   = pjGroupName
+  version = pjVersion
+}

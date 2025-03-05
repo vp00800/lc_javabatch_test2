@@ -1,0 +1,79 @@
+name: Test Workflow CI
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "**"
+
+env:
+  APP_PJ_PREFIX: "blank"
+  PACKAGE_USERNAME: ${{ secrets.PACKAGE_USERNAME }}
+  PACKAGE_REPO_TOKEN: ${{ secrets.PACKAGE_REPO_TOKEN }}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'adopt'
+          java-version: 17
+          cache: 'gradle'
+
+      - name: Test with Gradle
+        run: |
+          chmod +x gradlew
+          ./gradlew clean test --continue
+          rm -rf test-results
+          mkdir test-results
+          for proj in $APP_PJ_PREFIX-*; do \
+            test_results_dir="$proj/build/test-results/test"; \
+            [ -d "$test_results_dir" ] && mv  "$test_results_dir"/*.xml  "test-results/"; \
+          done
+        continue-on-error: true
+
+      - name: Upload JUnit test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-test-results
+          path: test-results
+          retention-days: 3
+
+  report:
+    name: Generate Report
+    needs: test
+    runs-on: ubuntu-latest
+
+    permissions: write-all
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download JUnit test results
+        uses: actions/download-artifact@v4
+        with:
+          name: junit-test-results
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: JUnit Testing
+          path: '**/TEST-*.xml'
+          reporter: java-junit

@@ -1,0 +1,61 @@
+pluginManagement {
+    repositories {
+        mavenLocal()
+        maven {
+          name = "github-repo"
+          url = "https://maven.pkg.github.com/YMC-GROUP/YNA-G3-PACKAGES"
+          credentials {
+            username = providers.gradleProperty("gpr.user").orElse(providers.environmentVariable("PACKAGE_USERNAME").orElse('')).get()
+            password = providers.gradleProperty("gpr.key").orElse(providers.environmentVariable("PACKAGE_REPO_TOKEN").orElse('')).get()
+          }
+          mavenContent {
+            releasesOnly()
+          }
+        }        
+        gradlePluginPortal()
+        maven { url 'https://repo.spring.io/release' }
+        maven { url 'https://repo.spring.io/snapshot' }
+    }
+   
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.namespace == 'com.ymsl.solid.build') {
+                	useVersion("${settings['framework_version']}")
+            }
+        }
+    }
+}
+ 
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version "0.8.0"
+}
+
+dependencyResolutionManagement {
+  repositories {
+    mavenLocal()
+    maven {
+      name = "github-repo"
+      url = "https://maven.pkg.github.com/YMC-GROUP/YNA-G3-PACKAGES"
+      credentials {
+           username = providers.gradleProperty("gpr.user").orElse(providers.environmentVariable("PACKAGE_USERNAME").orElse('')).get()
+           password = providers.gradleProperty("gpr.key").orElse(providers.environmentVariable("PACKAGE_REPO_TOKEN").orElse('')).get()
+      }
+      mavenContent {
+        releasesOnly()
+      }
+    } 
+    mavenCentral()
+    maven { url = "https://build.shibboleth.net/maven/releases/"}
+  }
+
+  versionCatalogs {
+       libs {
+            // from("com.ymsl.solid:gradle-version-catalog:${settings['framework_version']}")
+            // overwrite the "groovy" version declared in the imported catalog
+            // version("groovy", "3.0.6")
+        }
+  }
+}
+
+include 'batch-application'
