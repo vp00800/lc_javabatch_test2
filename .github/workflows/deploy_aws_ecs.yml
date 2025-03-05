@@ -31,7 +31,7 @@ jobs:
       - name: Access to AWS
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_NAME }}
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_ROLE_NAME }}
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Export AWS_ACCOUNT_ID to environment variable
