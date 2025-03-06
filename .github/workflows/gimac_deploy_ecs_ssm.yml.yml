@@ -8,7 +8,7 @@ on:
 env:
   PACKAGE_USERNAME: ${{ secrets.PACKAGE_USERNAME }}
   PACKAGE_REPO_TOKEN: ${{ secrets.PACKAGE_REPO_TOKEN }}
-  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_REGION: ${{ vars.AWS_REGION }}
   AWS_ROLE_NAME: ${{ secrets.AWS_ROLE_NAME }}
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
   TASK_DEFINITION_NAME: ${{ secrets.GIMAC_TASK_DEFINITION_NAME }}
@@ -21,7 +21,8 @@ permissions:
   id-token: write
  
 jobs:
-  build-and-update-task-def:
+#  build-and-update-task-def:
+  build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
  
